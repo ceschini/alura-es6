@@ -3,27 +3,33 @@ class NegociacaoController {
   // obs: evitar percorrer o DOM muitas vezes
   constructor() {
     let $ = document.querySelector.bind(document);
-
+    // "_" -> Convencao: só a classe pode chamar e utilizar
     this._inputData = $('#data');
     this._inputQuantidade = $('#quantidade');
     this._inputValor = $('#valor');
+    this._listaNegociacoes = new ListaNegociacoes();
   }
 
   adiciona(event) {
     event.preventDefault();
-    // spread operator = '...'
-    let data = new Date(
-      ...this._inputData.value
-      .split('-')
-      // arrow function = '=>'
-      .map((item, indice) => item - indice % 2)
-    );
+    // adiciona na ListaNegociacoes
+    this._listaNegociacoes.adiciona(this._criaNegociacao());
+    console.log(this._listaNegociacoes.negociacoes);
+    this._limpaFormulario();
+  }
 
-    let negociacao = new Negociacao(
-      data,
+  _criaNegociacao() {
+    return new Negociacao(
+      DateHelper.textoParaData(this._inputData.value),
       this._inputQuantidade.value,
       this._inputValor.value
     );
-    console.log(negociacao);
+  }
+
+  _limpaFormulario() {
+    this._inputData.value = '';
+    this._inputQuantidade = 1;
+    this._inputValor = 0.0;
+    this._inputData.focus();
   }
 }
