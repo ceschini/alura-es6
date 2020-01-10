@@ -30,17 +30,20 @@ class NegociacaoController {
 
   // AJAX
   importaNegociacoes() {
-    let service = new NegociacaoService();
-    service.obterNegociacoesDaSemana((err, negociacoes) => {
 
-      // error first convention
-      if (err) {
-        this._mensagem.texto = err;
-        return;
-      }
-      negociacoes.forEach(negociacao => this._listaNegociacoes.adiciona(negociacao));
-      this._mensagem.texto = "Negociacoes importadas";
-    });
+    let service = new NegociacaoService();
+
+    Promise.all([
+        service.obterNegociacoesDaSemana(),
+        service.obterNegociacoesDaSemanaAnterior(),
+        service.obterNegociacoesDaSemanaRetrasada()
+      ]).then(negociacoes => {
+        negociacoes
+          .reduce((arrayAchatado, array) => arrayAchatado.concat(array), [])
+          .forEach(negociacao => this._listaNegociacoes.adiciona(negociacao));
+        this._mensagem.texto = 'Negociações importadas com sucesso';
+      })
+      .catch(error => this._mensagem.texto = error);
   }
 
   apaga() {
